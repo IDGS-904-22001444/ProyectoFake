@@ -1,0 +1,20 @@
+pipeline {
+    agent any
+    parameters { // Parámetros para definir la URL y branch del repositorio
+        string(name: 'REPO_URL', defaultValue: '', description: 'URL del repo')
+        string(name: 'REPO_BRANCH', defaultValue: '', description: 'Branch')
+    }
+    stages { // Etapas del pipeline
+        stage('Clonar Repo') {
+            steps { // Simulacion de la clonación del repositorio
+                echo "Clonando repo ${params.REPO_URL} en branch ${params.REPO_BRANCH}"
+            }
+        }
+        // Simulación de la ejecución de pruebas
+        stage('Simular Build/Test') {
+            steps {
+                echo "Simulando build/test del repo"
+            }
+        }
+    }
+}

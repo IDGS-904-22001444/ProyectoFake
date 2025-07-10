@@ -1,0 +1,53 @@
+pipeline {
+    agent any
+    parameters {
+        // Parámetros para definir las URLs y branches de los repositorios A y B
+        string(name: 'REPO_A_URL', defaultValue: 'https://gitlab.com/thv3/back/thv-back-area-urgencias.git', description: 'URL repo A (prueba)')
+        string(name: 'REPO_A_BRANCH', defaultValue: 'develop', description: 'Branch repo A (prueba)')
+        string(name: 'REPO_B_URL', defaultValue: 'https://git.quarksoft.net/ultratech-thv/thv-back-area-urgencias.git', description: 'URL repo B (prueba)')
+        string(name: 'REPO_B_BRANCH', defaultValue: 'ultratech', description: 'Branch repo B (prueba)')
+    }
+    stages {
+        stage('Ejecutar Pipelines SyncBack') {
+            // Esta etapa ejecuta los pipelines de Backend
+            steps {
+                script {
+                    def backPipelines = [ // Pipelines de Backend
+                        'SyncBackAreaUrgencia',
+                        'SyncBackAreaHospitalizacion',
+                        'SyncBackBase',
+                        'SyncBackAuth',
+                        'SyncBackClinicalStation'
+                    ]
+                    for (p in backPipelines) {
+                        build job: "SyncBack/${p}", //Funcion para ejecutar los pipelines de Backend
+                            parameters: [
+                                string(name: 'REPO_URL', value: params.REPO_A_URL),
+                                string(name: 'REPO_BRANCH', value: params.REPO_A_BRANCH)
+                            ]
+                    }
+                }
+            }
+        }
+        stage('Ejecutar Pipelines SyncFronts') {
+            steps {
+                script {
+                    def frontPipelines =  [ // Pipelines de Frontend
+                        'SyncFrontAreaUrgencia',
+                        'SyncFrontAreaHospitalizacion',
+                        'SyncFrontBase',
+                        'SyncFrontAuth',
+                        'SyncFrontClinicalStation'
+                    ]
+                    for (p in frontPipelines) {
+                        build job: "SyncFronts/${p}", //Funcion para ejecutar los pipelines de Frontend
+                            parameters: [
+                                string(name: 'REPO_URL', value: params.REPO_B_URL),
+                                string(name: 'REPO_BRANCH', value: params.REPO_B_BRANCH)
+                            ]
+                    }
+                }
+            }
+        }
+    }
+}
